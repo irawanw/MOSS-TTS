@@ -1,5 +1,36 @@
 # MOSS-TTS Family
 
+---
+
+## 🇮🇩 Indonesian (Bahasa Indonesia) LoRA Fine-tune
+
+Fine-tuned LoRA adapter that fixes Bahasa Indonesia phonology — the base model uses `language="Malay"` which produces Malaysian-English vowels (vowel **"a"** sounds like **"e"**). This LoRA corrects it to proper Indonesian pronunciation.
+
+**Training:** 1,436 samples (FLEURS id_id filtered top 25% + clean synthetic narrations) · LoRA rank 32 · 20 epochs · cosine LR · single RTX 3090
+
+### 🎧 Audio Comparison — same sentence, three models
+
+> *"Selamat datang di Indonesia, negeri yang kaya akan budaya dan keindahan alam. Dari Sabang sampai Merauke, setiap daerah memiliki keunikan tersendiri."*
+
+**Base model — `language="Malay"`** *(wrong vowels, high quality)*
+
+https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_base_malay.wav
+
+**Indonesian LoRA v1** *(correct phonology, noisy data)*
+
+https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_lora_v1.wav
+
+**Indonesian LoRA v2 ✨** *(correct phonology, filtered clean data — recommended)*
+
+https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_lora_v2.wav
+
+> 💡 Click any link above — GitHub opens a built-in audio player.
+> For side-by-side comparison: [Full Demo Page](https://htmlpreview.github.io/?https://github.com/irawanw/MOSS-TTS/blob/indonesian-lora/demos/index.html)
+
+→ [Full documentation & training guide](README_INDONESIAN.md)
+
+---
+
 <br>
 
 <p align="center">
