@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MOSS-TTS Indonesian LoRA — Audio Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 820px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header h1 { font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+    header p { color: #94a3b8; font-size: 0.95rem; }
+    .flag { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    .text-box {
+      background: #1e2433;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #cbd5e0;
+    }
+    .text-box strong { color: #a78bfa; font-size: 0.78rem; text-transform: uppercase;
+                       letter-spacing: 0.08em; display: block; margin-bottom: 0.5rem; }
+
+    .cards { display: grid; gap: 1.2rem; }
+
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #4f46e5; }
+    .card.best { border-color: #7c3aed; background: #1e1a2e; }
+
+    .card-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+    .badge {
+      font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem;
+      border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+    .badge-gray  { background: #2d3748; color: #94a3b8; }
+    .badge-blue  { background: #1e3a5f; color: #60a5fa; }
+    .badge-purple{ background: #2e1065; color: #a78bfa; }
+    .badge-green { background: #064e3b; color: #34d399; }
+
+    .card h2 { font-size: 1rem; font-weight: 600; color: #f1f5f9; }
+    .card p  { font-size: 0.85rem; color: #64748b; margin-bottom: 1rem; line-height: 1.5; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .tag {
+      font-size: 0.75rem; padding: 0.15rem 0.5rem;
+      border-radius: 4px; background: #0f172a; color: #64748b; border: 1px solid #1e293b;
+    }
+    .tag.bad  { color: #f87171; border-color: #7f1d1d; background: #1a0a0a; }
+    .tag.good { color: #34d399; border-color: #064e3b; background: #0a1a12; }
+
+    audio {
+      width: 100%;
+      border-radius: 6px;
+      accent-color: #7c3aed;
+    }
+    audio::-webkit-media-controls-panel { background: #0f1117; }
+
+    .best-label {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.78rem; font-weight: 600; color: #a78bfa;
+      margin-bottom: 0.6rem;
+    }
+
+    footer {
+      text-align: center; margin-top: 3rem;
+      font-size: 0.82rem; color: #475569;
+    }
+    footer a { color: #7c3aed; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="flag">🇮🇩</div>
+    <h1>MOSS-TTS Indonesian LoRA</h1>
+    <p>Fixing Bahasa Indonesia phonology on MOSS-TTS-Local-Transformer-v1.5</p>
+  </header>
+
+  <div class="text-box">
+    <strong>Test sentence (same text across all samples)</strong>
+    Selamat datang di Indonesia, negeri yang kaya akan budaya dan keindahan alam.
+    Dari Sabang sampai Merauke, setiap daerah memiliki keunikan tersendiri.
+    Bahasa Indonesia adalah bahasa persatuan yang menghubungkan lebih dari tiga ratus suku bangsa.
+    Semoga perjalanan Anda menyenangkan dan penuh kenangan indah.
+  </div>
+
+  <div class="cards">
+
+    <!-- Base model -->
+    <div class="card">
+      <div class="card-header">
+        <span class="badge badge-gray">Baseline</span>
+        <h2>Base Model — language: Malay</h2>
+      </div>
+      <p>Unmodified MOSS-TTS with <code>language="Malay"</code>. High audio quality but wrong Indonesian phonology.</p>
+      <div class="tag-row">
+        <span class="tag bad">vowel "a" → sounds like "e"</span>
+        <span class="tag bad">Malaysian accent</span>
+        <span class="tag good">clean audio</span>
+        <span class="tag good">no noise</span>
+      </div>
+      <audio controls src="sample_base_malay.wav"></audio>
+    </div>
+
+    <!-- v1 LoRA -->
+    <div class="card">
+      <div class="card-header">
+        <span class="badge badge-blue">v1 LoRA</span>
+        <h2>Indonesian LoRA v1 — rank 16, 3 epochs</h2>
+      </div>
+      <p>First LoRA fine-tune on full FLEURS Indonesian dataset (3,616 samples, unfiltered). Correct phonology but inherits noise from crowd-sourced training data.</p>
+      <div class="tag-row">
+        <span class="tag good">correct Indonesian vowels</span>
+        <span class="tag bad">noisy training data</span>
+        <span class="tag bad">rough audio quality</span>
+      </div>
+      <audio controls src="sample_lora_v1.wav"></audio>
+    </div>
+
+    <!-- v2 LoRA -->
+    <div class="card best">
+      <div class="best-label">★ Recommended</div>
+      <div class="card-header">
+        <span class="badge badge-purple">v2 LoRA</span>
+        <h2>Indonesian LoRA v2 — rank 32, 20 epochs</h2>
+      </div>
+      <p>Trained on quality-filtered data: top 25% of FLEURS (SNR-filtered) + clean synthetic narrations. Rank 32 with cosine LR over 20 epochs.</p>
+      <div class="tag-row">
+        <span class="tag good">correct Indonesian vowels</span>
+        <span class="tag good">cleaner audio</span>
+        <span class="tag good">filtered dataset</span>
+        <span class="tag good">rank 32 · 20 epochs</span>
+      </div>
+      <audio controls src="sample_lora_v2.wav"></audio>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>
+      <a href="../README_INDONESIAN.md">README</a> ·
+      <a href="https://github.com/irawanw/MOSS-TTS/tree/indonesian-lora">GitHub</a> ·
+      Base model: <a href="https://huggingface.co/OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5">MOSS-TTS-Local-Transformer-v1.5</a>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
