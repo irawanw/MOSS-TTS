@@ -20,6 +20,16 @@ from accelerate import Accelerator
 from accelerate.utils import DistributedType, set_seed
 from accelerate.utils.dataclasses import DistributedDataParallelKwargs
 from torch.optim import AdamW
+try:
+    import bitsandbytes as bnb
+    _BNB_AVAILABLE = True
+except ImportError:
+    _BNB_AVAILABLE = False
+try:
+    from peft import LoraConfig, get_peft_model, TaskType
+    _PEFT_AVAILABLE = True
+except ImportError:
+    _PEFT_AVAILABLE = False
 from torch.utils.data import DataLoader
 from transformers import AutoModel, AutoProcessor, get_scheduler
 from transformers.utils import cached_file
@@ -127,6 +137,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--mixed-precision", type=str, default="bf16", choices=["no", "fp16", "bf16"])
     parser.add_argument("--attn-implementation", type=str, default="auto")
+    parser.add_argument("--use-lora", action="store_true", default=False)
+    parser.add_argument("--lora-rank", type=int, default=16)
+    parser.add_argument("--lora-alpha", type=int, default=32)
     parser.add_argument("--audio-tokenizer-device", type=str, default=None)
     parser.add_argument("--n-vq", type=int, default=None)
     parser.add_argument("--gradient-checkpointing", action="store_true")
@@ -952,6 +965,18 @@ def main() -> None:
             impl=args.gradient_checkpointing_impl,
         )
 
+    if _PEFT_AVAILABLE and getattr(args, "use_lora", False):
+        lora_config = LoraConfig(
+            r=getattr(args, "lora_rank", 16),
+            lora_alpha=getattr(args, "lora_alpha", 32),
+            lora_dropout=0.05,
+            bias="none",
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            task_type=TaskType.CAUSAL_LM,
+        )
+        model = get_peft_model(model, lora_config)
+        model.print_trainable_parameters()
+
     resolved_channelwise_loss_weight = parse_channelwise_loss_weight(
         args.channelwise_loss_weight,
         int(model.config.n_vq) + 1,
@@ -1000,14 +1025,23 @@ def main() -> None:
     else:
         micro_batches_per_epoch = math.ceil(len(records) / global_micro_batch_size)
 
-    optimizer = AdamW(
-        model.parameters(),
-        lr=args.learning_rate,
-        weight_decay=args.weight_decay,
-        betas=(args.adam_beta1, args.adam_beta2),
-        eps=args.adam_eps,
-        foreach=False,
-    )
+    if _BNB_AVAILABLE:
+        optimizer = bnb.optim.AdamW8bit(
+            model.parameters(),
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+            betas=(args.adam_beta1, args.adam_beta2),
+            eps=args.adam_eps,
+        )
+    else:
+        optimizer = AdamW(
+            model.parameters(),
+            lr=args.learning_rate,
+            weight_decay=args.weight_decay,
+            betas=(args.adam_beta1, args.adam_beta2),
+            eps=args.adam_eps,
+            foreach=False,
+        )
 
     update_steps_per_epoch = math.ceil(micro_batches_per_epoch / args.gradient_accumulation_steps)
     max_train_steps = args.max_train_steps or (args.num_epochs * update_steps_per_epoch)
