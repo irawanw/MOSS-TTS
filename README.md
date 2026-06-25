@@ -13,18 +13,14 @@ Fine-tuned LoRA adapter that fixes Bahasa Indonesia phonology — the base model
 > *"Selamat datang di Indonesia, negeri yang kaya akan budaya dan keindahan alam. Dari Sabang sampai Merauke, setiap daerah memiliki keunikan tersendiri."*
 
 **Base model — `language="Malay"`** *(wrong vowels, high quality)*
-
-https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_base_malay.wav
+<video src="https://github.com/irawanw/MOSS-TTS/releases/download/indonesian-lora-demo/sample_base_malay.wav" controls width="100%"></video>
 
 **Indonesian LoRA v1** *(correct phonology, noisy data)*
-
-https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_lora_v1.wav
+<video src="https://github.com/irawanw/MOSS-TTS/releases/download/indonesian-lora-demo/sample_lora_v1.wav" controls width="100%"></video>
 
 **Indonesian LoRA v2 ✨** *(correct phonology, filtered clean data — recommended)*
+<video src="https://github.com/irawanw/MOSS-TTS/releases/download/indonesian-lora-demo/sample_lora_v2.wav" controls width="100%"></video>
 
-https://github.com/irawanw/MOSS-TTS/raw/indonesian-lora/demos/sample_lora_v2.wav
-
-> 💡 Click any link above — GitHub opens a built-in audio player.
 > For side-by-side comparison: [Full Demo Page](https://htmlpreview.github.io/?https://github.com/irawanw/MOSS-TTS/blob/indonesian-lora/demos/index.html)
 
 → [Full documentation & training guide](README_INDONESIAN.md)
